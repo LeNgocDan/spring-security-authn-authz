@@ -27,6 +27,6 @@ public class SpringSecurityAuthnAuthnApplication implements CommandLineRunner {
 		User user = new User("dan", passwordEncoder.encode("pass"), "dan@gmail.com", true);
 		User user_2 = new User("thang", passwordEncoder.encode("pass"), "thang@gmail.com", true);
 		user.withRole(new Authorities().withUsername("dan").withAuthority("ROLE_User")); services.saveUser(user);
-		user_2.withRole(new Authorities().withUsername("thu").withAuthority("ROLE_Admin")); services.saveUser(user_2);
+		user_2.withRole(new Authorities().withUsername("thang").withAuthority("ROLE_Admin")); services.saveUser(user_2);
 	}
 }

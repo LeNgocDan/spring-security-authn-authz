@@ -10,10 +10,10 @@
       <li class="nav-item active">
         <a class="nav-link" href="/">Home</a>
       </li>
-      <li class="nav-item active">
+      <li class="nav-item">
         <a class="nav-link" href="/profile">User Profile</a>
       </li>
-      <li class="nav-item active">
+      <li sec:authorize-expr="hasRole('ROLE_Admin')" class="nav-item">
         <a class="nav-link" href="/admin">Admin</a>
       </li>
       <li class="nav-item">
@@ -22,8 +22,8 @@
       <li class="nav-item">
         <a class="nav-link" href="/logout">logout</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/login">login</a>
+      <li class="nav-item" sec:authorize="isAuthenticated()">
+        <div>User: </div><a class="nav-link" sec:authentication="name"></a>
       </li>
     </ul>
   </div>
