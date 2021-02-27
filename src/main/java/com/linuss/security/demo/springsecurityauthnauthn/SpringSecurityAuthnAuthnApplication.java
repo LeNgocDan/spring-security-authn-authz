@@ -1,7 +1,9 @@
 package com.linuss.security.demo.springsecurityauthnauthn;
 
 import com.linuss.security.demo.springsecurityauthnauthn.entities.Authorities;
+import com.linuss.security.demo.springsecurityauthnauthn.entities.Customer;
 import com.linuss.security.demo.springsecurityauthnauthn.entities.User;
+import com.linuss.security.demo.springsecurityauthnauthn.repository.CustomerRepository;
 import com.linuss.security.demo.springsecurityauthnauthn.services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -16,6 +18,9 @@ public class SpringSecurityAuthnAuthnApplication implements CommandLineRunner {
 	UserServices services;
 
 	@Autowired
+	CustomerRepository customerRepo;
+
+	@Autowired
 	PasswordEncoder passwordEncoder;
 
 	public static void main(String[] args) {
@@ -28,5 +33,9 @@ public class SpringSecurityAuthnAuthnApplication implements CommandLineRunner {
 		User user_2 = new User("thang", passwordEncoder.encode("pass"), "thang@gmail.com", true);
 		user.withRole(new Authorities().withUsername("dan").withAuthority("ROLE_User")); services.saveUser(user);
 		user_2.withRole(new Authorities().withUsername("thang").withAuthority("ROLE_Admin")); services.saveUser(user_2);
+
+		Customer customer_1 = new Customer("ngocdan", passwordEncoder.encode("pass"), "ngocdan@gmail.com");
+		customerRepo.save(customer_1);
+
 	}
 }

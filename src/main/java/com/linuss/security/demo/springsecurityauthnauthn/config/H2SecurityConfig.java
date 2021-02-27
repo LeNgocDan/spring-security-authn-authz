@@ -1,14 +1,18 @@
 package com.linuss.security.demo.springsecurityauthnauthn.config;
 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 //@Configuration
+//@Order(1)
 public class H2SecurityConfig extends WebSecurityConfigurerAdapter {
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers("/h2-console/**").permitAll();
-		http.csrf().disable();
-		http.headers().frameOptions().disable();
+		@Override
+		protected void configure(HttpSecurity httpSecurity) throws Exception {
+			httpSecurity.authorizeRequests().antMatchers("/").permitAll().and()
+				.authorizeRequests().antMatchers("/console/**").permitAll();
+			httpSecurity.csrf().disable();
+			httpSecurity.headers().frameOptions().disable();
 	}
 }

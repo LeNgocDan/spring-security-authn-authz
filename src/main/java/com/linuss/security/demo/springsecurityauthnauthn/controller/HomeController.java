@@ -1,10 +1,14 @@
 package com.linuss.security.demo.springsecurityauthnauthn.controller;
 
-import com.linuss.security.demo.springsecurityauthnauthn.entities.Authorities;
-import com.linuss.security.demo.springsecurityauthnauthn.entities.User;
+import com.linuss.security.demo.springsecurityauthnauthn.entities.Customer;
+import com.linuss.security.demo.springsecurityauthnauthn.event.UserRegistrationEvent;
+import com.linuss.security.demo.springsecurityauthnauthn.repository.ConfirmationTokenRepository;
+import com.linuss.security.demo.springsecurityauthnauthn.repository.CustomerRepository;
 import com.linuss.security.demo.springsecurityauthnauthn.request.UserRegisterRequest;
+import com.linuss.security.demo.springsecurityauthnauthn.services.EmailSenderService;
 import com.linuss.security.demo.springsecurityauthnauthn.services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +29,18 @@ public class HomeController {
   
   @Autowired
   PasswordEncoder passwordEncoder;
+
+  @Autowired
+  EmailSenderService emailSenderService;
+
+  @Autowired
+  CustomerRepository customerRepo;
+
+  @Autowired
+  ConfirmationTokenRepository confirmationTokenRepo;
+
+  @Autowired
+  ApplicationEventPublisher eventPublisher;
 
   @GetMapping("/")
   public String index() {
@@ -62,12 +78,20 @@ public class HomeController {
     if(result.hasErrors()) {
       return "register";
     }
-    User user = new User(userReq.getUsername(),
-      passwordEncoder.encode(userReq.getPassword()),
-      userReq.getEmail(), true);
-    user.withRole(new Authorities().withUsername(userReq.getUsername()).withAuthority("ROLE_User"));
-
-    userServices.saveUser(user);
+//    User user = new User(userReq.getUsername(),
+//      passwordEncoder.encode(userReq.getPassword()),
+//      userReq.getEmail(), true);
+//    user.withRole(new Authorities().withUsername(userReq.getUsername()).withAuthority("ROLE_User"));
+//
+//    userServices.saveUser(user);
+    Customer customer = new Customer();
+    customer.setUsername(userReq.getUsername());
+    customer.setEmail(userReq.getEmail());
+    customer.setPassword(passwordEncoder.encode(userReq.getPassword()));
+    customer.setVerified(false);
+    customer.setEnabled(false);
+    customerRepo.save(customer);
+    eventPublisher.publishEvent(new UserRegistrationEvent(customer));
     return "redirect:register?success";
   }
 }
