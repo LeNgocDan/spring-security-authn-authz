@@ -2,9 +2,9 @@ package com.linuss.security.demo.springsecurityauthnauthz.services;
 
 import com.linuss.security.demo.springsecurityauthnauthz.entities.Customer;
 import com.linuss.security.demo.springsecurityauthnauthz.repository.CustomerRepository;
+import com.linuss.security.demo.springsecurityauthnauthz.request.CustomerOAuth2Req;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -25,6 +25,9 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 	@Autowired
 	RedirectStrategy redirect;
 
+	@Autowired
+	CustomerRegistrationService customerRegistrationService;
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 		System.out.println("call success handler!");
@@ -32,18 +35,40 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 		if(!isCustomer) {
 			OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
 			Map<String, Object> attributes = token.getPrincipal().getAttributes();
-			Customer customer = new Customer();
 			String name = attributes.get("name").toString();
 			String firstName = name.split(" ")[0];
 			String lastName = name.split(" ")[1];
 			String email = attributes.get("email").toString();
-			customer.setUsername(name);
-			customer.setEmail(email);
-			customer.setVerified(true);
-			customer.setEnabled(true);
-			customer.setPassword("Dan123456@");
-			customerRepo.save(customer);
+			CustomerOAuth2Req customer = new CustomerOAuth2Req(name,  email);
+			customerRegistrationService.registerNewCustomerOAuth2(customer);
 		}
 		this.redirect.sendRedirect(request, response, "/");
 	}
+
+	/**
+	 @Override
+	 public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+	 Authentication authentication) throws IOException, ServletException {
+	 if(!this.portfolioService.userHasAportfolio(authentication.getName())) {
+	 this.portfolioService.createNewPortfolio(authentication.getName());
+	 OAuth2AuthenticationToken token = (OAuth2AuthenticationToken)authentication;
+	 Map<String, Object> attributes = token.getPrincipal().getAttributes();
+	 String firstname = null, lastname = null, email = null;
+	 if(token.getAuthorizedClientRegistrationId().equals("facebook")) {
+	 String name = attributes.get("name").toString();
+	 firstname = name.split(" ")[0];
+	 lastname = name.split(" ")[1];
+	 email = attributes.get("email").toString();
+	 } else if (token.getPrincipal() instanceof DefaultOidcUser) {
+	 DefaultOidcUser oidcToken = (DefaultOidcUser) token.getPrincipal();
+	 firstname = oidcToken.getGivenName();
+	 lastname = oidcToken.getFamilyName();
+	 email = oidcToken.getEmail();
+	 }
+	 UserOAuth2Dto user = new UserOAuth2Dto(firstname,lastname,authentication.getName(),email);
+	 this.userRegistrationService.registerNewAuth2User(user);
+	 }
+	 this.redirectStrategy.sendRedirect(request, response, "/portfolio");
+	 }
+	 **/
 }
