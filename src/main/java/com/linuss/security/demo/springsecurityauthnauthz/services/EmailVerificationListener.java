@@ -2,6 +2,7 @@ package com.linuss.security.demo.springsecurityauthnauthz.services;
 
 import com.linuss.security.demo.springsecurityauthnauthz.event.UserRegistrationEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,8 +16,14 @@ public class EmailVerificationListener implements ApplicationListener<UserRegist
 	@Autowired
 	private VerificationService verificationService;
 
+	@Value(value = "${disableEmailVerification}")
+	private boolean disableEmailVerification;
+
 	@Override
 	public void onApplicationEvent(UserRegistrationEvent event) {
+		if(disableEmailVerification) {
+			return;
+		}
 		String username = event.getCustomer().getUsername();
 		Long verificationId = verificationService.createVerification(username);
 		String email = event.getCustomer().getEmail();
